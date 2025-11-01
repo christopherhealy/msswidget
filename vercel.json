@@ -1,16 +1,7 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" },
-    { "src": "index.html", "use": "@vercel/static" },
-    { "src": "Dashboard.html", "use": "@vercel/static" },
-    { "src": "Widget.html", "use": "@vercel/static" },
-    { "src": "WidgetAdmin.html", "use": "@vercel/static" },
-    { "src": "WidgetSurvey.html", "use": "@vercel/static" }
-  ],
+  "public": true,
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
     { "src": "/(.*)", "dest": "/$1" }
-  ],
-  "public": true
+  ]
 }

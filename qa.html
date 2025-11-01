@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MSS QA Suite</title>
+<style>
+  :root {
+    --edge: #e5e7eb; --muted: #6b7280; --blue: #1a5cff;
+    --card: #fff; --bg: #f6f7fb; --green: #059669;
+  }
+  body {
+    margin: 0; background: var(--bg);
+    font-family: -apple-system, system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    color: #111827;
+  }
+  .wrap {
+    max-width: 900px; margin: 24px auto; padding: 0 16px;
+  }
+  h1 { font-size: 20px; margin: 0 0 12px; }
+  h3 { margin: 18px 0 6px; font-size: 16px; }
+  .card {
+    background: var(--card); border: 1px solid var(--edge);
+    border-radius: 16px; box-shadow: 0 10px 28px rgba(0,0,0,.05);
+    padding: 20px;
+  }
+  textarea, input, select {
+    width: 100%; border: 1px solid var(--edge);
+    border-radius: 12px; padding: 10px 12px; font: inherit;
+    margin-top: 4px;
+  }
+  button {
+    border: 1px solid var(--edge);
+    background: var(--blue); color: white; font-weight: 600;
+    border-radius: 999px; padding: 10px 16px; cursor: pointer;
+  }
+  button.secondary {
+    background: #fff; color: var(--blue);
+  }
+  .row { margin-bottom: 14px; }
+  .status {
+    margin-top: 14px; font-size: 14px;
+  }
+  .status.ok { color: var(--green); }
+  .status.err { color: #b91c1c; }
+  footer {
+    margin-top: 30px; text-align: center;
+    font-size: 12px; color: var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>MSS QA Suite</h1>
+
+  <div class="card">
+    <div class="row">
+      <label>Tester Name</label>
+      <input id="tester" placeholder="Your name...">
+    </div>
+
+    <div class="row">
+      <label>Component</label>
+      <select id="component">
+        <option>Widget</option>
+        <option>WidgetAdmin</option>
+        <option>WidgetSurvey</option>
+        <option>Dashboard</option>
+        <option>Logger</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>Test Description</label>
+      <textarea id="desc" rows="3" placeholder="e.g. Record button should enable after mic permission"></textarea>
+    </div>
+
+    <div class="row">
+      <label>Result</label>
+      <select id="result">
+        <option value="PASS">PASS ✅</option>
+        <option value="FAIL">FAIL ❌</option>
+        <option value="N/A">N/A</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>Notes</label>
+      <textarea id="notes" rows="2" placeholder="Optional notes..."></textarea>
+    </div>
+
+    <div class="row" style="text-align:right;">
+      <button id="submitBtn">Log Result</button>
+      <button id="clearBtn" class="secondary">Clear</button>
+    </div>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <footer>
+    Results are logged to <code>qa-log-YYYY-MM-DD.csv</code> via <b>qa-server.js</b> (port 3020).
+  </footer>
+</div>
+
+<script>
+const API = "http://localhost:3020/qa-log";
+const $ = id => document.getElementById(id);
+const statusBox = $("status");
+
+function showStatus(msg, ok=true){
+  statusBox.textContent = msg;
+  statusBox.className = "status " + (ok ? "ok" : "err");
+}
+
+$("submitBtn").addEventListener("click", async ()=>{
+  const payload = {
+    timestamp: new Date().toISOString(),
+    tester: $("tester").value.trim(),
+    component: $("component").value.trim(),
+    desc: $("desc").value.trim(),
+    result: $("result").value,
+    notes: $("notes").value.trim(),
+  };
+
+  if (!payload.tester || !payload.desc){
+    showStatus("Please fill in required fields.", false);
+    return;
+  }
+
+  try {
+    const r = await fetch(API, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(payload),
+    });
+    if (r.ok) {
+      showStatus("✅ Logged successfully");
+      $("desc").value = "";
+      $("notes").value = "";
+    } else {
+      showStatus("⚠️ Log failed (" + r.status + ")", false);
+    }
+  } catch (err){
+    console.error(err);
+    showStatus("❌ Connection error", false);
+  }
+});
+
+$("clearBtn").addEventListener("click", ()=>{
+  $("tester").value = "";
+  $("desc").value = "";
+  $("notes").value = "";
+  showStatus("Form cleared", true);
+});
+</script>
+</body>
+</html>
