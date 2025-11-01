@@ -268,9 +268,9 @@ function fileToDataUrl(f){ return new Promise((res,rej)=>{ const r=new FileReade
 /* ---------- Load ---------- */
 async function loadAll(){
   const [f,c,i] = await Promise.allSettled([
-    fetch('form.json?ts='+Date.now(),{cache:'no-store'}),
-    fetch('config.json?ts='+Date.now(),{cache:'no-store'}),
-    fetch('image.json?ts='+Date.now(),{cache:'no-store'}),
+    fetch('\form.json?ts='+Date.now(),{cache:'no-store'}),
+    fetch('\config.json?ts='+Date.now(),{cache:'no-store'}),
+    fetch('\image.json?ts='+Date.now(),{cache:'no-store'}),
   ]);
 
   // Defaults are aligned to your latest form/config
