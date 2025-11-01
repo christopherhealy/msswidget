@@ -10,7 +10,42 @@
   <script>
     async function loadTheme() {
       try {
-        const res = await fetch('config.json?ts=' + Date.now(), { cache: 'no-store' });
+       
+  async function loadJsonOneOf(paths) {
+    for (const p of paths) {
+      try {
+        const r = await fetch(p + (p.includes('?') ? '' : '?ts=' + Date.now()), { cache: 'no-store' });
+        if (r.ok) return await r.json();
+      } catch (e) {
+        // try next
+      }
+    }
+    return null;
+  }
+
+  async function loadTheme() {
+    // tries root, absolute, and a .txt fallback (for “Netlify/Vercel renamed it” situations)
+    const cfg =
+      await loadJsonOneOf([
+        'config.json',
+        '/config.json',
+        'config.txt',
+        '/config.txt'
+      ]) || {};
+
+    const t = (cfg.theme || 'Default').toLowerCase();
+    const file =
+      t === 'pink'  ? 'themes/mss-widget-pink.css'  :
+      t === 'apple' ? 'themes/mss-widget-apple.css' :
+                      'themes/mss-widget-default.css';
+
+    const link = document.getElementById('themeCss');
+    link.onerror = () => link.setAttribute('href', 'themes/mss-widget-default.css');
+    link.setAttribute('href', file);
+  }
+
+  loadTheme();
+
         const cfg = await res.json();
         const t = (cfg.theme || 'Default').toLowerCase();
         const file =
