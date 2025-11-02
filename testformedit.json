@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test Form (edit)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; padding: 20px; background: #f8fafc; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 18px; max-width: 460px; }
+    h1 { margin-top: 0; font-size: 18px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    input[type="text"] { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #cbd5f5; font-size: 15px; }
+    button { margin-top: 14px; background: #1a5cff; color: #fff; border: none; border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+    .muted { color: #64748b; font-size: 13px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Edit testform message</h1>
+    <label for="msg">Message</label>
+    <input id="msg" type="text" placeholder="hello vercel" />
+    <button id="saveBtn">Save</button>
+    <p class="muted" id="hint">Will save to browser storage (not the actual JSON file).</p>
+  </div>
+
+  <script>
+    const KEY = "mss-testform-message";
+
+    async function init() {
+      // if we already have a local override, use it
+      const existing = localStorage.getItem(KEY);
+      if (existing && existing.trim() !== "") {
+        document.getElementById("msg").value = existing;
+        return;
+      }
+
+      // else try to load from JSON
+      try {
+        const res = await fetch("testform.json?ts=" + Date.now(), { cache: "no-store" });
+        const data = await res.json();
+        if (data && data.message) {
+          document.getElementById("msg").value = data.message;
+        }
+      } catch (e) {
+        // ignore – just leave box blank
+      }
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      const v = document.getElementById("msg").value || "";
+      localStorage.setItem(KEY, v);
+      // go back to viewer
+      location.href = "testform.html";
+    });
+
+    init();
+  </script>
+</body>
+</html>

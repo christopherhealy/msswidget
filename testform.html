@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test Form (view)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; padding: 20px; background: #f8fafc; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 18px; max-width: 460px; }
+    h1 { margin-top: 0; font-size: 18px; }
+    .msg { font-size: 24px; font-weight: 700; margin: 10px 0 16px; }
+    button { background: #1a5cff; color: #fff; border: none; border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+    .muted { color: #64748b; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Testform (view)</h1>
+    <p class="muted">Loaded from <code>testform.json</code>, but can be overridden locally.</p>
+    <div id="message" class="msg">Loading…</div>
+    <button id="editBtn">Edit message</button>
+    <p class="muted" id="sourceInfo"></p>
+  </div>
+
+  <script>
+    const KEY = "mss-testform-message";
+
+    async function loadMessage() {
+      let source = "remote JSON";
+      let msg = "";
+
+      try {
+        const res = await fetch("testform.json?ts=" + Date.now(), { cache: "no-store" });
+        const data = await res.json();
+        msg = data.message || "";
+      } catch (e) {
+        msg = "(could not load testform.json)";
+        source = "error";
+      }
+
+      // local override?
+      const local = localStorage.getItem(KEY);
+      if (local && local.trim() !== "") {
+        msg = local;
+        source = "localStorage override";
+      }
+
+      document.getElementById("message").textContent = msg;
+      document.getElementById("sourceInfo").textContent = "Source: " + source;
+    }
+
+    document.getElementById("editBtn").addEventListener("click", () => {
+      // go to editor
+      location.href = "testformedit.html";
+    });
+
+    loadMessage();
+  </script>
+</body>
+</html>
