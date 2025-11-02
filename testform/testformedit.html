@@ -11,41 +11,50 @@
 
     <p>
       New message:
-      <input id="newmsg" />
+      <input id="newMsg" />
       <button id="saveBtn">Save</button>
     </p>
 
     <p id="status"></p>
 
     <script>
-      const SERVICE = "http://localhost:3010/testform.json";
+      // 👉 Same endpoint as viewer
+      const SERVICE = "https://msswidget-service.onrender.com/testform.json";
+      // const SERVICE = "http://localhost:3000/testform.json"; // for local
 
-      async function loadCurrent() {
-        const res = await fetch(SERVICE, { cache: "no-store" });
-        const data = await res.json();
-        document.getElementById("current").textContent = data.message || "";
-        document.getElementById("newmsg").value = data.message || "";
-      }
-
-      async function save() {
-        const msg = document.getElementById("newmsg").value;
-        const res = await fetch(SERVICE, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: msg })
-        });
-        const data = await res.json();
-        if (data.ok) {
-          document.getElementById("status").textContent = "saved ✔";
-          // refresh current
-          loadCurrent();
-        } else {
-          document.getElementById("status").textContent = "save failed";
+      async function load() {
+        try {
+          const res = await fetch(SERVICE, { cache: "no-store" });
+          const data = await res.json();
+          document.getElementById("current").textContent =
+            data.message || "";
+          document.getElementById("newMsg").value = data.message || "";
+        } catch (e) {
+          document.getElementById("status").textContent = "load failed";
         }
       }
 
-      document.getElementById("saveBtn").addEventListener("click", save);
-      loadCurrent();
+      async function save() {
+        const msg = document.getElementById("newMsg").value;
+        try {
+          const res = await fetch(SERVICE, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: msg })
+          });
+          const data = await res.json();
+          document.getElementById("status").textContent = "saved ✅";
+          document.getElementById("current").textContent = data.message || "";
+        } catch (e) {
+          document.getElementById("status").textContent = "save failed ❌";
+        }
+      }
+
+      document
+        .getElementById("saveBtn")
+        .addEventListener("click", save);
+
+      load();
     </script>
   </body>
 </html>
