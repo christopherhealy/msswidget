@@ -1,44 +1,51 @@
 <!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Edit testform</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-</head>
-<body>
-  <h1>Edit test message</h1>
-  <p>Current message:</p>
-  <p id="current">Loading…</p>
+  <head>
+    <meta charset="utf-8" />
+    <title>Edit test message</title>
+  </head>
+  <body>
+    <h1>Edit test message</h1>
 
-  <label>
-    New message:
-    <input id="newMsg" type="text" style="width:280px">
-  </label>
-  <button id="saveBtn">Save (client only)</button>
+    <p>Current: <span id="current">loading…</span></p>
 
-  <p id="note" style="color:#666;font-size:13px;margin-top:1rem;">
-    On Vercel static we can read <code>testform.json</code> but we can’t write it.
-    This shows the flow; local Node would persist.
-  </p>
+    <p>
+      New message:
+      <input id="newmsg" />
+      <button id="saveBtn">Save</button>
+    </p>
 
-  <script>
-    let original = '';
-    fetch('testform.json?ts=' + Date.now())
-      .then(r => r.json())
-      .then(data => {
-        original = data.message || '';
-        document.getElementById('current').textContent = original;
-        document.getElementById('newMsg').value = original;
-      })
-      .catch(() => {
-        document.getElementById('current').textContent = '(could not load JSON)';
-      });
+    <p id="status"></p>
 
-    document.getElementById('saveBtn').addEventListener('click', () => {
-      const v = document.getElementById('newMsg').value.trim();
-      document.getElementById('current').textContent = v || '(empty)';
-      alert('Updated in browser. To persist on Vercel, update testform.json in Git and redeploy.');
-    });
-  </script>
-</body>
+    <script>
+      const SERVICE = "http://localhost:3010/testform.json";
+
+      async function loadCurrent() {
+        const res = await fetch(SERVICE, { cache: "no-store" });
+        const data = await res.json();
+        document.getElementById("current").textContent = data.message || "";
+        document.getElementById("newmsg").value = data.message || "";
+      }
+
+      async function save() {
+        const msg = document.getElementById("newmsg").value;
+        const res = await fetch(SERVICE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          document.getElementById("status").textContent = "saved ✔";
+          // refresh current
+          loadCurrent();
+        } else {
+          document.getElementById("status").textContent = "save failed";
+        }
+      }
+
+      document.getElementById("saveBtn").addEventListener("click", save);
+      loadCurrent();
+    </script>
+  </body>
 </html>
