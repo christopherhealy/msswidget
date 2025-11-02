@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Testform viewer</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body>
+  <h1>Testform viewer</h1>
+  <p id="msg">Loading…</p>
+  <p><a href="testformedit.html">Edit message</a></p>
+
+  <script>
+    fetch('testform.json?ts=' + Date.now())
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('msg').textContent = data.message || '(no message)';
+      })
+      .catch(() => {
+        document.getElementById('msg').textContent = 'Could not load testform.json';
+      });
+  </script>
+</body>
+</html>
